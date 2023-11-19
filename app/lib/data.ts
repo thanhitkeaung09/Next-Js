@@ -1,3 +1,4 @@
+// 'use client';
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
@@ -9,33 +10,37 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+// import { unstable_noStore as noStore } from 'next/cache';
 
 export async function fetchRevenue() {
-  const data = await fetch("https://fakestoreapi.com/products");
-  return data;
+  // const data = await fetch("https://fakestoreapi.com/products");
+  // return data;
   // Add noStore() here prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
+  // noStore();
 
-  // try {
-  //   // Artificially delay a reponse for demo purposes.
-  //   // Don't do this in real life :)
+  try {
+    // Artificially delay a reponse for demo purposes.
+    // Don't do this in real life :)
 
-  //   // console.log('Fetching revenue data...');
-  //   // await new Promise((resolve) => setTimeout(resolve, 3000));
+    // console.log('Fetching revenue data...');
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  //   // const data = await sql<Revenue>`SELECT * FROM revenue`;
-  //   const data = await fetch("https://fakestoreapi.com/products");
+    const data = await sql<Revenue>`SELECT * FROM revenue`;
+    // const data = await fetch("https://fakestoreapi.com/products");
 
-  //   // console.log('Data fetch complete after 3 seconds.');
-  //   // console.log(data);
-  //   return data;
-  // } catch (error) {
-  //   console.error('Database Error:', error);
-  //   throw new Error('Failed to fetch revenue data.');
-  // }
+    // console.log('Data fetch complete after 3 seconds.');
+    // console.log(data.rows);
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
 }
 
 export async function fetchLatestInvoices() {
+
+  // noStore();
   try {
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -48,6 +53,7 @@ export async function fetchLatestInvoices() {
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
+    // console.log(latestInvoices);
     return latestInvoices;
   } catch (error) {
     console.error('Database Error:', error);
@@ -56,6 +62,8 @@ export async function fetchLatestInvoices() {
 }
 
 export async function fetchCardData() {
+
+  // noStore();
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
@@ -127,6 +135,8 @@ export async function fetchFilteredInvoices(
 }
 
 export async function fetchInvoicesPages(query: string) {
+
+  // noStore();
   try {
     const count = await sql`SELECT COUNT(*)
     FROM invoices
@@ -143,12 +153,13 @@ export async function fetchInvoicesPages(query: string) {
     return totalPages;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number  http://localhost:3000/dashboard/invoices/2e94d1ed-d220-449f-9f11-f0bbceed9645/editof invoices.');
   }
 }
 
 export async function fetchInvoiceById(id: string) {
   try {
+    
     const data = await sql<InvoiceForm>`
       SELECT
         invoices.id,
@@ -164,7 +175,8 @@ export async function fetchInvoiceById(id: string) {
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
     }));
-
+    
+    console.log(invoice);
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
@@ -172,6 +184,8 @@ export async function fetchInvoiceById(id: string) {
 }
 
 export async function fetchCustomers() {
+
+  // noStore();
   try {
     const data = await sql<CustomerField>`
       SELECT
@@ -180,7 +194,7 @@ export async function fetchCustomers() {
       FROM customers
       ORDER BY name ASC
     `;
-
+    // console.log(data.rows);
     const customers = data.rows;
     return customers;
   } catch (err) {
